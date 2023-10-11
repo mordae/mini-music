@@ -1,47 +1,44 @@
 #include <stdlib.h>
-#include <curses.h>
-#include <signal.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <math.h>
 
-static void handler(int signo)
+/* Last frequency selected. */
+static int freq = 440;
+
+/* Called when a key is pressed. */
+void key_pressed(char c)
 {
-	nocbreak();
-	echo();
-	endwin();
-	exit(signo);
+	if ('c' == c) {
+		freq = 261;
+	} else if ('d' == c) {
+		freq = 294;
+	} else if ('e' == c) {
+		freq = 330;
+	} else if ('f' == c) {
+		freq = 349;
+	} else if ('g' == c) {
+		freq = 392;
+	} else if ('a' == c) {
+		freq = 440;
+	} else if (('h' == c) || ('b' == c)) {
+		freq = 494;
+	} else if ('C' == c) {
+		freq = 523;
+	}
 }
 
-static void key_pressed(char c)
+/* Generates the music samples, blocking until they have been sent out. */
+void play_music(FILE *out)
 {
-	printf("%c\r\n", c);
-}
-
-static void play_music()
-{
-}
-
-int main()
-{
-	signal(SIGINT, handler);
-	signal(SIGTERM, handler);
-
-	initscr();
-	noecho();
-	cbreak();
-	timeout(-1);
-
-	while (1) {
-		int c;
-
-		while ((c = getch()) >= 0) {
-			key_pressed(c);
-		}
-
-		play_music();
-		usleep(100 * 1000);
+	/* Play the first half-period. */
+	for (int i = 0; i < 48000 / freq / 2; i++) {
+		char x = 0;
+		fwrite(&x, 1, 1, out);
 	}
 
-	handler(0);
-	return 0;
+	/* Play the second half-period. */
+	for (int i = 0; i < 48000 / freq / 2; i++) {
+		char x = 255;
+		fwrite(&x, 1, 1, out);
+	}
 }
