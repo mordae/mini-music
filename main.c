@@ -49,7 +49,7 @@ static void spawn_audio_player()
 		close(pipefd[1]);
 
 		/* Become audio player. */
-		execlp("aplay", "aplay", "-f", "U8", "-c", "1", "-r", "48000", "-q", "-B", "1",
+		execlp("aplay", "aplay", "-f", "S16_LE", "-c", "1", "-r", "48000", "-q", "-B", "1",
 		       NULL);
 
 		/* If it did not work out, fail. */
@@ -86,6 +86,9 @@ int main()
 		int c;
 
 		while ((c = getch()) >= 0) {
+			if (c <= 4)
+				handler(0);
+
 			key_pressed(c);
 		}
 
