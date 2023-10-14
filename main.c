@@ -49,7 +49,7 @@ static void spawn_audio_player()
 		close(pipefd[1]);
 
 		/* Become audio player. */
-		execlp("aplay", "aplay", "-f", "S16_LE", "-c", "1", "-r", "48000", "-q", "-B", "1",
+		execlp("aplay", "aplay", "-f", "S16_LE", "-c", "1", "-r", "48000", "-q", "-B", "10",
 		       NULL);
 
 		/* If it did not work out, fail. */
