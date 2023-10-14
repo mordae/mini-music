@@ -66,7 +66,7 @@ void key_pressed(char c)
 
 	if (MODE_STRING == mode) {
 		for (int i = 0; i < 48000 / 100; i++)
-			delay[i] = (short)rand();
+			delay[i] = (short)(rand() - RAND_MAX / 2);
 	}
 }
 
