@@ -11,10 +11,12 @@ enum mode {
 	MODE_SINE = 0,
 	MODE_SQUARE,
 	MODE_SAW,
+	MODE_STRING,
 	MODE_MAX,
 };
 
 static enum mode mode = MODE_SINE;
+static int delay[48000 / 100];
 
 enum tone {
 	KEY_NONE = 0,
@@ -61,6 +63,11 @@ void key_pressed(char c)
 	period = 48000.0 / freq;
 	strength = 0.5;
 	decay = 440.0 / freq;
+
+	if (MODE_STRING == mode) {
+		for (int i = 0; i < 48000 / 100; i++)
+			delay[i] = (short)rand();
+	}
 }
 
 static void play_sine(FILE *out)
@@ -94,6 +101,19 @@ static void play_saw(FILE *out)
 	}
 }
 
+static void play_string(FILE *out)
+{
+	short x = delay[0];
+	delay[0] = 4095 * (delay[0] * 4 + 4 * delay[period - 1]) / 4096 / 8;
+	fwrite(&x, 2, 1, out);
+
+	for (int i = 1; i < period; i++) {
+		x = delay[i];
+		delay[i] = 4095 * (delay[i] * 4 + 4 * delay[i - 1]) / 4096 / 8;
+		fwrite(&x, 2, 1, out);
+	}
+}
+
 /* Generates the music samples, blocking until they have been sent out. */
 void play_music(FILE *out)
 {
@@ -109,6 +129,9 @@ void play_music(FILE *out)
 	case MODE_SAW:
 		play_saw(out);
 		break;
+
+	case MODE_STRING:
+		play_string(out);
 
 	case MODE_MAX:
 		/* No idea. */
